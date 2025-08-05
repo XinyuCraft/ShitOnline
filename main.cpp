@@ -17,14 +17,17 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QFile config(".shitp2p/config.json");
-    QFile opConfig(".shitp2p/bin/config.json");
+    QString path = QApplication::applicationDirPath();
+    QString configPath = path + "/.shitonline/config.json";
+    QString opConfigPath = path + "/.shitonline/bin/config.json";
+    QFile config(configPath);
+    QFile opConfig(opConfigPath);
     QJsonDocument doc;
     QJsonDocument opDoc;
     QJsonObject jsonConfig;
 
-    if(QFileInfo::exists(".shitp2p/config.json") == false){
-        QDir().mkpath(".shitp2p/bin");  //创建目录
+    if(QFileInfo::exists(configPath) == false){
+        QDir().mkpath(path + "/.shitonline/bin");  //创建目录
         //生成UUID
         QUuid uuid = QUuid::createUuid();
         QString uuidString = uuid.toString(QUuid::WithoutBraces);
@@ -44,11 +47,10 @@ int main(int argc, char *argv[])
         config.close();
 
         //生成OpenP2P的配置
-        // 生成 OpenP2P 的配置
         QJsonObject networkConfig;
         networkConfig.insert("Token", 5623403884671677892);
         networkConfig.insert("Node", uuidString);
-        networkConfig.insert("User", "ShitP2P");
+        networkConfig.insert("User", "ShitOnline");
         networkConfig.insert("ShareBandwidth", 10);
         networkConfig.insert("ServerHost", "api.openp2p.cn");
         networkConfig.insert("ServerPort", 27183);
@@ -80,9 +82,17 @@ int main(int argc, char *argv[])
         }
 
         QString jsonString = config.readAll();
-        qDebug() <<jsonString.toUtf8();
         doc = QJsonDocument::fromJson(jsonString.toUtf8());
         config.close();
+
+        //打开OpenP2P的配置文件
+        if(!opConfig.open(QIODevice::ReadOnly)){
+            qDebug() <<"Failed to open config file:" << opConfig.errorString();
+        }
+
+        jsonString = opConfig.readAll();
+        opDoc = QJsonDocument::fromJson(jsonString.toUtf8());
+        opConfig.close();
     }
 
     Widget w(doc, opDoc);
