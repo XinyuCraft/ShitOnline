@@ -64,6 +64,25 @@ void Widget::saveOpConfig() //保存OpenP2P的配置
     opConfig.close();
 }
 
+void Widget::startOpenP2P() //启动OpenP2P
+{
+    QString workingDir = QCoreApplication::applicationDirPath() + "/.shitonline/bin";
+    QString exePath = workingDir + "/openp2p.exe";
+    if(!QFile::exists(exePath)) { //检查是否存在
+        qDebug() <<"openp2p.exe not found at "<<exePath;
+        return;
+    }
+
+    //启动OpenP2P
+    opProcess->setWorkingDirectory(workingDir);
+    opProcess->start(exePath);
+    // 检查是否启动成功
+    // if(!opProcess->waitForStarted(3000)) {
+    //     qDebug() << "启动失败:" << opProcess->errorString();
+    //     qDebug() << "错误详情:" << opProcess->readAllStandardError();
+    // }
+}
+
 void Widget::on_pushButton_copy_myuuid_clicked() //将UUID添加到剪贴板
 {
     addToClipboard(ui->label_myuuid->text());
@@ -84,24 +103,14 @@ void Widget::readOpOutut() //读取OpenP2P的输出
 void Widget::on_pushButton_start_clicked()
 {
     if(ui->pushButton_start->text() == "启动"){
+        //添加新的隧道
         addNewApp(ui->lineEdit_uuid->text(), ui->lineEdit_dstport->text().toInt(), ui->lineEdit_srcport->text().toInt(), ui->comboBox_protocol->currentText());
+
+        //保存OpenP2P的配置
         saveOpConfig();
 
-        QString workingDir = QCoreApplication::applicationDirPath() + "/.shitonline/bin";
-        QString exePath = workingDir + "/openp2p.exe";
-        if(!QFile::exists(exePath)) { //检查是否存在
-            qDebug() <<"openp2p.exe not found at "<<exePath;
-            return;
-        }
-
         //启动OpenP2P
-        opProcess->setWorkingDirectory(workingDir);
-        opProcess->start(exePath);
-        // 检查是否启动成功
-        // if(!opProcess->waitForStarted(3000)) {
-        //     qDebug() << "启动失败:" << opProcess->errorString();
-        //     qDebug() << "错误详情:" << opProcess->readAllStandardError();
-        // }
+        startOpenP2P();
 
         ui->pushButton_start->setText("关闭");
     }

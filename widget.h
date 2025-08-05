@@ -29,6 +29,7 @@ public:
 
     void addNewApp(QString uuid, int dstPort, int srcport, QString protocol);
     void saveOpConfig();
+    void startOpenP2P();
 
 private slots:
     void on_pushButton_copy_myuuid_clicked();
