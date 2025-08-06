@@ -26,8 +26,8 @@
       <widget class="QPushButton" name="pushButton_start">
        <property name="geometry">
         <rect>
-         <x>430</x>
-         <y>340</y>
+         <x>470</x>
+         <y>520</y>
          <width>80</width>
          <height>18</height>
         </rect>
@@ -182,6 +182,69 @@
          <string>udp</string>
         </property>
        </item>
+      </widget>
+      <widget class="QPushButton" name="pushButton_copy_addr">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>520</y>
+         <width>80</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>复制连接地址</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>490</y>
+         <width>81</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_connect_state">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>连接状态: 离线</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_mystate">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>本机状态: 离线</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_2">
