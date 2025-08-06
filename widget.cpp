@@ -96,15 +96,37 @@ void Widget::addToClipboard(QString copyMessage) //添加到剪贴板
 
 void Widget::readOpOutut() //读取OpenP2P的输出
 {
-    qDebug() <<opProcess->readAllStandardOutput();
+    QString protocol = ui->comboBox_protocol->currentText();
+    QString srcport = ui->lineEdit_srcport->text();
+
+    QString outPut = opProcess->readAllStandardOutput(); //获取OpenP2P的输出
+    qDebug() <<outPut;
+
+    if(outPut.contains("P2PNetwork init start")){ //OpenP2P是否启动成功
+        qDebug() <<"OpenP2P启动成功";
+
+        ui->label_mystate->setText("本机状态: 在线");
+    }
+
+    if(outPut.contains("LISTEN ON PORT " + protocol + ":" + srcport + " START")){ //隧道是否添加成功
+        qDebug() <<"隧道添加成功";
+
+        ui->label_connect_state->setText("连接状态: 在线");
+    }
 }
 
 
 void Widget::on_pushButton_start_clicked()
 {
     if(ui->pushButton_start->text() == "启动"){
+        //获取输入信息
+        QString uuid = ui->lineEdit_uuid->text();
+        int dstPort = ui->lineEdit_dstport->text().toInt();
+        int srcport = ui->lineEdit_srcport->text().toInt();
+        QString protocol = ui->comboBox_protocol->currentText();
+
         //添加新的隧道
-        addNewApp(ui->lineEdit_uuid->text(), ui->lineEdit_dstport->text().toInt(), ui->lineEdit_srcport->text().toInt(), ui->comboBox_protocol->currentText());
+        addNewApp(uuid, dstPort, srcport, protocol);
 
         //保存OpenP2P的配置
         saveOpConfig();
@@ -118,6 +140,14 @@ void Widget::on_pushButton_start_clicked()
         opProcess->kill(); //关闭OpenP2P
 
         ui->pushButton_start->setText("启动");
+        ui->label_connect_state->setText("连接状态: 离线");
+        ui->label_mystate->setText("本机状态: 离线");
     }
+}
+
+
+void Widget::on_pushButton_copy_addr_clicked()
+{
+    addToClipboard("localhost:" + ui->lineEdit_srcport->text());
 }
 

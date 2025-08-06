@@ -36,6 +36,8 @@ private slots:
 
     void on_pushButton_start_clicked();
 
+    void on_pushButton_copy_addr_clicked();
+
 private:
     Ui::Widget *ui;
 
