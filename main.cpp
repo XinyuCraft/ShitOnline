@@ -1,4 +1,5 @@
 #include "widget.h"
+#include "downloadframe.h"
 
 #include <QApplication>
 #include <QUuid>
@@ -12,19 +13,42 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 #include <QProcess>
+#include <QSslSocket>
+#include <QUrl>
+#include <QEventLoop>
+
+QString path;
+QString configPath;
+QString opConfigPath;
+QFile config;
+QFile opConfig;
+QJsonDocument doc;
+QJsonDocument opDoc;
+QJsonObject jsonConfig;
+
+
+// void verifyFileIntegrity(){ //检查文件完整性
+//     if(QFileInfo::exists(configPath) == false){
+//         QDir().mkpath(path + "/.shitonline/bin");  //创建目录
+//         //生成UUID
+//         QUuid uuid = QUuid::createUuid();
+//         QString uuidString = uuid.toString(QUuid::WithoutBraces);
+//     }
+// }
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
     QString path = QApplication::applicationDirPath();
-    QString configPath = path + "/.shitonline/config.json";
-    QString opConfigPath = path + "/.shitonline/bin/config.json";
-    QFile config(configPath);
-    QFile opConfig(opConfigPath);
-    QJsonDocument doc;
-    QJsonDocument opDoc;
-    QJsonObject jsonConfig;
+    // DownloadFrame d;
+    // d.show();
+    // d.DownloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
+    configPath = path + "/.shitonline/config.json";
+    opConfigPath = path + "/.shitonline/bin/config.json";
+
+    config.setFileName(configPath);
+    opConfig.setFileName(opConfigPath);
 
     if(QFileInfo::exists(configPath) == false){
         QDir().mkpath(path + "/.shitonline/bin");  //创建目录

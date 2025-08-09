@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 
 win32 {
     QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
@@ -13,13 +13,16 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    downloadframe.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
+    downloadframe.h \
     widget.h
 
 FORMS += \
+    downloadframe.ui \
     widget.ui
 
 # Default rules for deployment.
