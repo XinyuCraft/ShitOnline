@@ -1,12 +1,14 @@
 #include "downloadframe.h"
 #include "ui_downloadframe.h"
 
-DownloadFrame::DownloadFrame(QWidget *parent)
+DownloadFrame::DownloadFrame(QString title, QWidget *parent)
     : QFrame(parent)
     , ui(new Ui::DownloadFrame)
     , manager(new QNetworkAccessManager(this))
 {
     ui->setupUi(this);
+
+    this->setWindowTitle(title);
 }
 
 DownloadFrame::~DownloadFrame()

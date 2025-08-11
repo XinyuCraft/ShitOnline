@@ -19,7 +19,7 @@ class DownloadFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit DownloadFrame(QWidget *parent = nullptr);
+    explicit DownloadFrame(QString title, QWidget *parent = nullptr);
     ~DownloadFrame();
 
     void DownloadFile(QUrl downloadedUrl, QString filePath);
