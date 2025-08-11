@@ -106,7 +106,7 @@ void VerifyFileIntegrity(){ //检查文件完整性
     }
     if(!QFileInfo::exists(opPath)){
         //创建下载界面
-        DownloadFrame d;
+        DownloadFrame d("下载依赖文件");
         d.show();
 
         //等待下载完成
