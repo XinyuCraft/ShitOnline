@@ -7,6 +7,8 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle("ShitOnline: 一款简洁快速的联机工具");
+
     doc = _doc;
     opDoc = _opDoc;
     opProcess = new QProcess(this);

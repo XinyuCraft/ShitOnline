@@ -1,4 +1,5 @@
 #include "widget.h"
+#include "downloadframe.h"
 
 #include <QApplication>
 #include <QUuid>
@@ -12,30 +13,37 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 #include <QProcess>
+#include <QSslSocket>
+#include <QUrl>
+#include <QEventLoop>
+#include <private/qzipreader_p.h>
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
+QString path;
+QString opPath;
+QString configPath;
+QString opConfigPath;
+QFile config;
+QFile opConfig;
+QJsonDocument doc;
+QJsonDocument opDoc;
+QJsonObject jsonConfig;
 
-    QString path = QApplication::applicationDirPath();
-    QString configPath = path + "/.shitonline/config.json";
-    QString opConfigPath = path + "/.shitonline/bin/config.json";
-    QFile config(configPath);
-    QFile opConfig(opConfigPath);
-    QJsonDocument doc;
-    QJsonDocument opDoc;
-    QJsonObject jsonConfig;
+bool ZipReader(QString zipPath, QString zipDir){ //压缩包解压
+    QZipReader reader(zipPath);
+    return reader.extractAll(zipDir);
+}
 
-    if(QFileInfo::exists(configPath) == false){
-        QDir().mkpath(path + "/.shitonline/bin");  //创建目录
+void VerifyFileIntegrity(){ //检查文件完整性
+    QString uuidString;
+    QDir().mkpath(path + "/.shitonline/bin");  //创建目录
+    if(!QFileInfo::exists(configPath)){
         //生成UUID
         QUuid uuid = QUuid::createUuid();
-        QString uuidString = uuid.toString(QUuid::WithoutBraces);
+        uuidString = uuid.toString(QUuid::WithoutBraces);
 
         //创建并打开配置文件
         if (!config.open(QIODevice::WriteOnly)) {
             qDebug() << "Failed to open config file:" << config.errorString();
-            return -1;
         }
 
         //将UUID添加到json
@@ -45,7 +53,19 @@ int main(int argc, char *argv[])
         //写入JSON文件
         config.write(doc.toJson());
         config.close();
+    }
+    else{
+        //打开配置文件
+        if (!config.open(QIODevice::ReadOnly)) {
+            qDebug() << "Error opening file:" << config.errorString();
+        }
 
+        QString jsonString = config.readAll();
+        doc = QJsonDocument::fromJson(jsonString.toUtf8());
+        uuidString = doc.object().value("UUID").toString();
+        config.close();
+    }
+    if(!QFileInfo::exists(opConfigPath)){
         //生成OpenP2P的配置
         QJsonObject networkConfig;
         networkConfig.insert("Token", 5623403884671677892);
@@ -75,25 +95,51 @@ int main(int argc, char *argv[])
         opConfig.close();
     }
     else{
-        //打开配置文件
-        if (!config.open(QIODevice::ReadOnly)) {
-            qDebug() << "Error opening file:" << config.errorString();
-            return -1;
-        }
-
-        QString jsonString = config.readAll();
-        doc = QJsonDocument::fromJson(jsonString.toUtf8());
-        config.close();
-
         //打开OpenP2P的配置文件
         if(!opConfig.open(QIODevice::ReadOnly)){
             qDebug() <<"Failed to open config file:" << opConfig.errorString();
         }
 
-        jsonString = opConfig.readAll();
+        QString jsonString = opConfig.readAll();
         opDoc = QJsonDocument::fromJson(jsonString.toUtf8());
         opConfig.close();
     }
+    if(!QFileInfo::exists(opPath)){
+        //创建下载界面
+        DownloadFrame d;
+        d.show();
+
+        //等待下载完成
+        QEventLoop loop;
+        QObject::connect(&d, &DownloadFrame::downloadFinished, &loop, &QEventLoop::quit);
+
+        d.DownloadFile(QUrl("https://gh-proxy.com/https://github.com/openp2p-cn/openp2p/releases/download/v3.21.12/openp2p3.21.12.windows-amd64.zip"),
+                       path + "/.shitonline/openp2p.zip");
+        loop.exec();
+        d.close();
+
+        //解压压缩包
+        ZipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+
+    path = QApplication::applicationDirPath();
+    // DownloadFrame d;
+    // d.show();
+    // d.DownloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
+    opPath = path + "/.shitonline/bin/openp2p.exe";
+    configPath = path + "/.shitonline/config.json";
+    opConfigPath = path + "/.shitonline/bin/config.json";
+
+    config.setFileName(configPath);
+    opConfig.setFileName(opConfigPath);
+
+    //检查文件完整性
+    VerifyFileIntegrity();
 
     Widget w(doc, opDoc);
     w.show();
