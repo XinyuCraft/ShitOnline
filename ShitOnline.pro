@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network gui-private
 
 win32 {
     QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"

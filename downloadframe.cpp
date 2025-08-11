@@ -32,7 +32,7 @@ void DownloadFrame::DownloadFile(QUrl downloadedUrl, QString filePath) //下载�
     connect(reply, &QNetworkReply::downloadProgress, this, [this, file](qint64 bytesReceived, qint64 bytesTotal){
         ui->progressBar->setMaximum(bytesTotal);
         ui->progressBar->setValue(bytesReceived);
-        ui->label_download_msg->setText(QString("下载进度: %1/%2 bytes").arg(formatFileSize(bytesReceived)).arg(formatFileSize(bytesTotal)));
+        ui->label_download_msg->setText(QString("下载进度: %1/%2").arg(formatFileSize(bytesReceived)).arg(formatFileSize(bytesTotal)));
     });
 
     //写入文件
@@ -45,10 +45,12 @@ void DownloadFrame::DownloadFile(QUrl downloadedUrl, QString filePath) //下载�
         if(reply->error() == QNetworkReply::NoError){
             file->write(reply->readAll());
             file->close();
+            QMessageBox::information(this, "下载信息", "下载成功");
             emit downloadFinished(true); //成功
         }
         else{
             qDebug() <<"下载失败: "<<reply->errorString();
+            QMessageBox::warning(this, "下载信息", QString("下载失败: %1").arg(reply->errorString()));
             emit downloadFinished(false); //失败
         }
 
@@ -73,5 +75,5 @@ QString DownloadFrame::formatFileSize(qint64 bytes) //将qint64转为文件大�
     else if(bytes >= KB)
         return QString("%1 KB").arg(QString::number(bytes / (double)KB, 'f', 2));
     else
-        return QString("%1 bytes").arg(bytes);
+        return QString("%1 B").arg(bytes);
 }

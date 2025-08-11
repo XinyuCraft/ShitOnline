@@ -8,6 +8,7 @@
 #include <QUrl>
 #include <QFile>
 #include <QFileInfo>
+#include <QMessageBox>
 
 namespace Ui {
 class DownloadFrame;
