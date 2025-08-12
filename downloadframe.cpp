@@ -18,7 +18,7 @@ DownloadFrame::~DownloadFrame()
 
 
 
-void DownloadFrame::DownloadFile(QUrl downloadedUrl, QString filePath) //下载文件
+void DownloadFrame::downloadFile(QUrl downloadedUrl, QString filePath) //下载文件
 {
     QFile *file = new QFile(filePath);
     if(!file->open(QIODevice::WriteOnly)){

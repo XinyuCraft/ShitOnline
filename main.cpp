@@ -28,12 +28,12 @@ QJsonDocument doc;
 QJsonDocument opDoc;
 QJsonObject jsonConfig;
 
-bool ZipReader(QString zipPath, QString zipDir){ //压缩包解压
+bool zipReader(QString zipPath, QString zipDir){ //压缩包解压
     QZipReader reader(zipPath);
     return reader.extractAll(zipDir);
 }
 
-void VerifyFileIntegrity(){ //检查文件完整性
+void verifyFileIntegrity(){ //检查文件完整性
     QString uuidString;
     QDir().mkpath(path + "/.shitonline/bin");  //创建目录
     if(!QFileInfo::exists(configPath)){
@@ -113,13 +113,13 @@ void VerifyFileIntegrity(){ //检查文件完整性
         QEventLoop loop;
         QObject::connect(&d, &DownloadFrame::downloadFinished, &loop, &QEventLoop::quit);
 
-        d.DownloadFile(QUrl("https://gh-proxy.com/https://github.com/openp2p-cn/openp2p/releases/download/v3.21.12/openp2p3.21.12.windows-amd64.zip"),
+        d.downloadFile(QUrl("https://gh-proxy.com/https://github.com/openp2p-cn/openp2p/releases/download/v3.21.12/openp2p3.21.12.windows-amd64.zip"),
                        path + "/.shitonline/openp2p.zip");
         loop.exec();
         d.close();
 
         //解压压缩包
-        ZipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
+        zipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
     }
 }
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     path = QApplication::applicationDirPath();
     // DownloadFrame d;
     // d.show();
-    // d.DownloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
+    // d.downloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
     opPath = path + "/.shitonline/bin/openp2p.exe";
     configPath = path + "/.shitonline/config.json";
     opConfigPath = path + "/.shitonline/bin/config.json";
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     opConfig.setFileName(opConfigPath);
 
     //检查文件完整性
-    VerifyFileIntegrity();
+    verifyFileIntegrity();
 
     Widget w(doc, opDoc);
     w.show();

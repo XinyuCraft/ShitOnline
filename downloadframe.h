@@ -22,7 +22,7 @@ public:
     explicit DownloadFrame(QString title, QWidget *parent = nullptr);
     ~DownloadFrame();
 
-    void DownloadFile(QUrl downloadedUrl, QString filePath);
+    void downloadFile(QUrl downloadedUrl, QString filePath);
     QString formatFileSize(qint64 bytes);
 
 signals:
