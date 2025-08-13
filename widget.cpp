@@ -13,6 +13,23 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent)
     opDoc = _opDoc;
     opProcess = new QProcess(this);
 
+    //系统托盘
+    systemTrayIcon = new QSystemTrayIcon(this);
+    menu = new QMenu(this);
+    systemTrayIcon->setToolTip("ShitOnline");
+    systemTrayIcon->setIcon(QIcon(":/image/icon.png"));
+
+    //绑定动作
+    connect(ui->actionShow, &QAction::triggered, this, &Widget::show);
+    connect(ui->actionExit, &QAction::triggered, this, &QApplication::quit);
+    connect(systemTrayIcon, &QSystemTrayIcon::activated, this, &Widget::onSystemTrayClicked);
+
+    //添加到系统托盘
+    menu->addAction(ui->actionShow);
+    menu->addAction(ui->actionExit);
+    systemTrayIcon->setContextMenu(menu);
+    systemTrayIcon->show();
+
     ui->label_myuuid->setText(doc.object().value("UUID").toString());
 
     //连接信号与槽
@@ -117,6 +134,12 @@ void Widget::readOpOutut() //读取OpenP2P的输出
     }
 }
 
+void Widget::closeEvent(QCloseEvent *event) //重写退出事件
+{
+    this->hide();
+    event->ignore();
+}
+
 
 void Widget::on_pushButton_start_clicked()
 {
@@ -151,5 +174,12 @@ void Widget::on_pushButton_start_clicked()
 void Widget::on_pushButton_copy_addr_clicked()
 {
     addToClipboard("localhost:" + ui->lineEdit_srcport->text());
+}
+
+void Widget::onSystemTrayClicked(QSystemTrayIcon::ActivationReason reason) //处理
+{
+    if(reason == QSystemTrayIcon::DoubleClick){
+        this->show();
+    }
 }
 

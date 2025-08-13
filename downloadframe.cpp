@@ -8,7 +8,7 @@ DownloadFrame::DownloadFrame(QString title, QWidget *parent)
 {
     ui->setupUi(this);
 
-    this->setWindowTitle(title);
+    setWindowTitle(title);
 }
 
 DownloadFrame::~DownloadFrame()

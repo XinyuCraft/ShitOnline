@@ -126,6 +126,7 @@ void verifyFileIntegrity(){ //检查文件完整性
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setWindowIcon(QIcon(":/image/icon.png"));
 
     path = QApplication::applicationDirPath();
     // DownloadFrame d;

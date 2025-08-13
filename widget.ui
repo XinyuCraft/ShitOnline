@@ -247,6 +247,22 @@
     </widget>
    </item>
   </layout>
+  <action name="actionExit">
+   <property name="text">
+    <string>退出程序</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionShow">
+   <property name="text">
+    <string>显示程序</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
