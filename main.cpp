@@ -1,5 +1,6 @@
 #include "widget.h"
 #include "downloadframe.h"
+#include "httpapiclient.h"
 
 #include <QApplication>
 #include <QUuid>
@@ -27,6 +28,7 @@ QFile opConfig;
 QJsonDocument doc;
 QJsonDocument opDoc;
 QJsonObject jsonConfig;
+HttpApiClient *client;
 
 bool zipReader(QString zipPath, QString zipDir){ //压缩包解压
     QZipReader reader(zipPath);
@@ -105,15 +107,25 @@ void verifyFileIntegrity(){ //检查文件完整性
         opConfig.close();
     }
     if(!QFileInfo::exists(opPath)){
+        QString downloadUrl;
+        QEventLoop loop;
+
+        //获取OpenP2P的最新版本
+        client->getOpLatestVersion();
+        QObject::connect(client, &HttpApiClient::getOpLatestVersionFinished, [&downloadUrl, &loop](QString _version, QString _downloadUrl){
+            downloadUrl = "https://gh-proxy.com/" +  _downloadUrl;
+            loop.quit();
+        });
+        loop.exec();
+
         //创建下载界面
         DownloadFrame d("下载依赖文件");
         d.show();
 
         //等待下载完成
-        QEventLoop loop;
         QObject::connect(&d, &DownloadFrame::downloadFinished, &loop, &QEventLoop::quit);
 
-        d.downloadFile(QUrl("https://gh-proxy.com/https://github.com/openp2p-cn/openp2p/releases/download/v3.21.12/openp2p3.21.12.windows-amd64.zip"),
+        d.downloadFile(QUrl(downloadUrl),
                        path + "/.shitonline/openp2p.zip");
         loop.exec();
         d.close();
@@ -127,6 +139,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":/image/icon.png"));
+
+    client = new HttpApiClient();
 
     path = QApplication::applicationDirPath();
     // DownloadFrame d;
