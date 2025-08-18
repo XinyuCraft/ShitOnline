@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     //检查文件完整性
     verifyFileIntegrity();
 
-    Widget w(doc, opDoc);
+    Widget w(doc, opDoc, client);
     w.show();
     return a.exec();
 }
