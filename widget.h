@@ -1,6 +1,8 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
+#include "httpapiclient.h"
+
 #include <QWidget>
 #include <QClipboard>
 #include <QDebug>
@@ -28,7 +30,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent = nullptr);
+    Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client, QWidget *parent = nullptr);
     ~Widget();
 
     void addNewApp(QString uuid, int dstPort, int srcport, QString protocol);
@@ -54,6 +56,7 @@ private:
     QJsonDocument doc;
     QJsonDocument opDoc;
     QProcess *opProcess;
+    HttpApiClient *client;
 
     //系统托盘
     QSystemTrayIcon *systemTrayIcon;

@@ -1,7 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent)
+Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
@@ -12,6 +12,7 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent)
     doc = _doc;
     opDoc = _opDoc;
     opProcess = new QProcess(this);
+    client = _client;
 
     //系统托盘
     systemTrayIcon = new QSystemTrayIcon(this);

@@ -23,7 +23,7 @@ private:
     QNetworkAccessManager *manager = new QNetworkAccessManager;
 
 signals:
-    void getOpLatestVersionFinished(QString _version, QString _downloadPath);
+    void getOpLatestVersionFinished(QString _version, QString _downloadUrl);
 };
 
 
