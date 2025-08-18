@@ -1,3 +1,4 @@
+![logo](./icon.png)
 # ShitOnline
 (目前还在开发中...)
 
