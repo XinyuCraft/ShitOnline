@@ -1,6 +1,8 @@
 #ifndef WIDGET_H
 #define WIDGET_H
 
+#include "httpapiclient.h"
+
 #include <QWidget>
 #include <QClipboard>
 #include <QDebug>
@@ -12,6 +14,10 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 #include <QProcess>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QCloseEvent>
+#include <QApplication>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,7 +30,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QJsonDocument _doc, QJsonDocument _opDoc, QWidget *parent = nullptr);
+    Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client, QWidget *parent = nullptr);
     ~Widget();
 
     void addNewApp(QString uuid, int dstPort, int srcport, QString protocol);
@@ -38,14 +44,22 @@ private slots:
 
     void on_pushButton_copy_addr_clicked();
 
+    void onSystemTrayClicked(QSystemTrayIcon::ActivationReason reason);
+
 private:
     Ui::Widget *ui;
 
     void addToClipboard(QString copyMessage);
     void readOpOutut();
+    void closeEvent(QCloseEvent *event);
 
     QJsonDocument doc;
     QJsonDocument opDoc;
     QProcess *opProcess;
+    HttpApiClient *client;
+
+    //系统托盘
+    QSystemTrayIcon *systemTrayIcon;
+    QMenu *menu;
 };
 #endif // WIDGET_H

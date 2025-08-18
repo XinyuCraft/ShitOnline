@@ -1,5 +1,6 @@
 #include "widget.h"
 #include "downloadframe.h"
+#include "httpapiclient.h"
 
 #include <QApplication>
 #include <QUuid>
@@ -27,13 +28,14 @@ QFile opConfig;
 QJsonDocument doc;
 QJsonDocument opDoc;
 QJsonObject jsonConfig;
+HttpApiClient *client;
 
-bool ZipReader(QString zipPath, QString zipDir){ //压缩包解压
+bool zipReader(QString zipPath, QString zipDir){ //压缩包解压
     QZipReader reader(zipPath);
     return reader.extractAll(zipDir);
 }
 
-void VerifyFileIntegrity(){ //检查文件完整性
+void verifyFileIntegrity(){ //检查文件完整性
     QString uuidString;
     QDir().mkpath(path + "/.shitonline/bin");  //创建目录
     if(!QFileInfo::exists(configPath)){
@@ -105,32 +107,45 @@ void VerifyFileIntegrity(){ //检查文件完整性
         opConfig.close();
     }
     if(!QFileInfo::exists(opPath)){
+        QString downloadUrl;
+        QEventLoop loop;
+
+        //获取OpenP2P的最新版本
+        client->getOpLatestVersion();
+        QObject::connect(client, &HttpApiClient::getOpLatestVersionFinished, [&downloadUrl, &loop](QString _version, QString _downloadUrl){
+            downloadUrl = "https://gh-proxy.com/" +  _downloadUrl;
+            loop.quit();
+        });
+        loop.exec();
+
         //创建下载界面
         DownloadFrame d("下载依赖文件");
         d.show();
 
         //等待下载完成
-        QEventLoop loop;
         QObject::connect(&d, &DownloadFrame::downloadFinished, &loop, &QEventLoop::quit);
 
-        d.DownloadFile(QUrl("https://gh-proxy.com/https://github.com/openp2p-cn/openp2p/releases/download/v3.21.12/openp2p3.21.12.windows-amd64.zip"),
+        d.downloadFile(QUrl(downloadUrl),
                        path + "/.shitonline/openp2p.zip");
         loop.exec();
         d.close();
 
         //解压压缩包
-        ZipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
+        zipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
     }
 }
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setWindowIcon(QIcon(":/image/icon.png"));
+
+    client = new HttpApiClient();
 
     path = QApplication::applicationDirPath();
     // DownloadFrame d;
     // d.show();
-    // d.DownloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
+    // d.downloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
     opPath = path + "/.shitonline/bin/openp2p.exe";
     configPath = path + "/.shitonline/config.json";
     opConfigPath = path + "/.shitonline/bin/config.json";
@@ -139,7 +154,7 @@ int main(int argc, char *argv[])
     opConfig.setFileName(opConfigPath);
 
     //检查文件完整性
-    VerifyFileIntegrity();
+    verifyFileIntegrity();
 
     Widget w(doc, opDoc);
     w.show();

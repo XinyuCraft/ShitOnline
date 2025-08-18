@@ -14,11 +14,13 @@ CONFIG += c++17
 
 SOURCES += \
     downloadframe.cpp \
+    httpapiclient.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
     downloadframe.h \
+    httpapiclient.h \
     widget.h
 
 FORMS += \
@@ -32,3 +34,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     README.md
+
+RESOURCES += \
+    res.qrc
