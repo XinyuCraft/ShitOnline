@@ -21,6 +21,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QJsonParseError>
+#include <QListWidgetItem>
+#include <QListWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +40,9 @@ public:
 
     void startOpenP2P();
 
+    HttpApiClient *client;
+    ConfigManager *manager;
+
 private slots:
     void on_pushButton_start_clicked();
 
@@ -49,6 +54,7 @@ private slots:
 
     void loadApp();
 
+public slots:
     void deleteApp(QListWidgetItem *item, const int &srcport);
 
     void editApp(const QString &appName, const QString &uuid, const int &dstport, const int &pastSrcPort, const QString &protocol, AppItem *item);
@@ -56,6 +62,8 @@ private slots:
 signals:
     void connected(QString connectionInfo); //连接成功
     void disconnected(QString connectionInfo); //取消连接
+    void started(); //启动信号
+    void stopped(); //关闭信号
 
 private:
     Ui::Widget *ui;
@@ -64,8 +72,6 @@ private:
     void closeEvent(QCloseEvent *event);
 
     QProcess *opProcess;
-    HttpApiClient *client;
-    ConfigManager *manager;
 
     //系统托盘
     QSystemTrayIcon *systemTrayIcon;

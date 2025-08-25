@@ -6,6 +6,8 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 
+class Widget;
+
 namespace Ui {
 class AppItem;
 }
@@ -15,7 +17,7 @@ class AppItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_appName, const QString &_uuid, const int &_dstport, const int &_srcport, const QString &_protocol, QWidget *parent = nullptr);
+    explicit AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_appName, const QString &_uuid, const int &_dstport, const int &_srcport, const QString &_protocol, Widget *parent = nullptr);
     ~AppItem();
 
     void changeConnectionState(QString connectionInfo = "");

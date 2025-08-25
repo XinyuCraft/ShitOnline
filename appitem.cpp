@@ -1,12 +1,14 @@
 #include "appitem.h"
 #include "ui_appitem.h"
+#include "widget.h"
 
-AppItem::AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_appName, const QString &_uuid, const int &_dstport, const int &_srcport, const QString &_protocol, QWidget *parent)
+AppItem::AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_appName, const QString &_uuid, const int &_dstport, const int &_srcport, const QString &_protocol, Widget *parent)
     : QWidget(parent)
     , ui(new Ui::AppItem)
 {
     ui->setupUi(this);
 
+    //初始化
     item = _item;
     enabled = _enabled;
     appName = _appName;
@@ -21,6 +23,19 @@ AppItem::AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_ap
     ui->label_srcport->setText("本地端口: " + QString::number(srcport));
     ui->label_protocol->setText("协议: " + protocol);
     ui->checkBox->setChecked(enabled);
+
+    connect(this, &AppItem::appDeleted, parent, &Widget::deleteApp);
+    connect(this, &AppItem::appEdited, parent, &Widget::editApp);
+    connect(parent, &Widget::started, this, [this](){
+        ui->pushButton_del->setEnabled(false);
+        ui->pushButton_edit->setEnabled(false);
+        ui->checkBox->setEnabled(false);
+    });
+    connect(parent, &Widget::stopped, this, [this](){
+        ui->pushButton_del->setEnabled(true);
+        ui->pushButton_edit->setEnabled(true);
+        ui->checkBox->setEnabled(true);
+    });
 }
 
 AppItem::~AppItem()

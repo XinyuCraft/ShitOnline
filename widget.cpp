@@ -61,9 +61,7 @@ void Widget::addNewApp(const QString &appName, const QString &uuid, const int &d
 
         ui->listWidget->setItemWidget(item, appItem);
 
-        connect(appItem, &AppItem::appDeleted, this, &Widget::deleteApp);
         connect(appItem, &AppItem::enabledChanged, manager, &ConfigManager::changeEnabled);
-        connect(appItem, &AppItem::appEdited, this, &Widget::editApp);
         connect(this, &Widget::connected, appItem, &AppItem::changeConnectionState);
         connect(this, &Widget::disconnected, appItem, &AppItem::changeConnectionState);
 
@@ -92,9 +90,7 @@ void Widget::loadApp()
 
         ui->listWidget->setItemWidget(item, appItem);
 
-        connect(appItem, &AppItem::appDeleted, this, &Widget::deleteApp);
         connect(appItem, &AppItem::enabledChanged, manager, &ConfigManager::changeEnabled);
-        connect(appItem, &AppItem::appEdited, this, &Widget::editApp);
         connect(this, &Widget::connected, appItem, &AppItem::changeConnectionState);
         connect(this, &Widget::disconnected, appItem, &AppItem::changeConnectionState);
     }
@@ -116,9 +112,14 @@ void Widget::editApp(const QString &appName, const QString &uuid, const int &dst
     addNewAppDialog->show();
 
     connect(addNewAppDialog, &AddNewAppDialog::dataReturned, this, [this, item, pastSrcPort](const QString &appName, const QString &uuid, const int &dstport, const int &srcport, const QString &protocol){
-        this->manager->changeAppConfig(pastSrcPort, appName, uuid, dstport, srcport, protocol);
-        this->manager->saveOpConfig();
-        item->changeApp(appName, uuid, dstport, srcport, protocol);
+        if(manager->isSrcPortTaken(srcport) == true){
+            this->manager->changeAppConfig(pastSrcPort, appName, uuid, dstport, srcport, protocol);
+            this->manager->saveOpConfig();
+            item->changeApp(appName, uuid, dstport, srcport, protocol);
+        }
+        else{
+            QMessageBox::warning(this, "添加错误", "本地端口被占用, 请更换本地端口");
+        }
     });
 
     addNewAppDialog->exec();
@@ -171,6 +172,9 @@ void Widget::closeEvent(QCloseEvent *event) //重写退出事件
 void Widget::on_pushButton_start_clicked()
 {
     if(ui->pushButton_start->text() == "启动"){
+        //发出启动信号
+        emit started();
+
         //保存配置
         manager->saveConfig();
         manager->saveOpConfig();
@@ -179,12 +183,21 @@ void Widget::on_pushButton_start_clicked()
         startOpenP2P();
 
         ui->pushButton_start->setText("关闭");
+
+        //禁用添加隧道按钮
+        ui->pushButton_add_new_app->setEnabled(false);
     }
     else if(ui->pushButton_start->text() == "关闭"){
+        //发出关闭信号
+        emit stopped();
+
         opProcess->kill(); //关闭OpenP2P
         emit disconnected("");
         ui->pushButton_start->setText("启动");
         ui->label_mystate->setText("本机状态: 离线");
+
+        //启用添加隧道功能
+        ui->pushButton_add_new_app->setEnabled(true);
     }
 }
 
