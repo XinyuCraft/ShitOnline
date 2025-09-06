@@ -4,6 +4,12 @@ HttpApiClient::HttpApiClient(QObject *parent)
     : QObject{parent}
 {}
 
+HttpApiClient *HttpApiClient::getInstance()
+{
+    static HttpApiClient *instance = new HttpApiClient();
+    return instance;
+}
+
 void HttpApiClient::getOpLatestVersion() //获取OpenP2P最新版本
 {
     QNetworkRequest request(QUrl("https://api.github.com/repos/openp2p-cn/openp2p/releases/latest"));

@@ -2,22 +2,27 @@
 #define WIDGET_H
 
 #include "httpapiclient.h"
+#include "addnewappdialog.h"
+#include "appitem.h"
+#include "configmanager.h"
 
 #include <QWidget>
 #include <QClipboard>
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonValue>
-#include <QJsonParseError>
 #include <QProcess>
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QCloseEvent>
 #include <QApplication>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <QJsonParseError>
+#include <QListWidgetItem>
+#include <QListWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,33 +35,43 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client, QWidget *parent = nullptr);
+    Widget(QWidget *parent = nullptr);
     ~Widget();
 
-    void addNewApp(QString uuid, int dstPort, int srcport, QString protocol);
-    void saveOpConfig();
     void startOpenP2P();
 
-private slots:
-    void on_pushButton_copy_myuuid_clicked();
+    HttpApiClient *client;
+    ConfigManager *manager;
 
+private slots:
     void on_pushButton_start_clicked();
 
-    void on_pushButton_copy_addr_clicked();
-
     void onSystemTrayClicked(QSystemTrayIcon::ActivationReason reason);
+
+    void on_pushButton_add_new_app_clicked();
+
+    void addNewApp(const QString &appName, const QString &uuid, const int &dstport, const int &srcport, const QString &protocol);
+
+    void loadApp();
+
+public slots:
+    void deleteApp(QListWidgetItem *item, const int &srcport);
+
+    void editApp(const QString &appName, const QString &uuid, const int &dstport, const int &pastSrcPort, const QString &protocol, AppItem *item);
+
+signals:
+    void connected(QString connectionInfo); //连接成功
+    void disconnected(QString connectionInfo); //取消连接
+    void started(); //启动信号
+    void stopped(); //关闭信号
 
 private:
     Ui::Widget *ui;
 
-    void addToClipboard(QString copyMessage);
     void readOpOutut();
     void closeEvent(QCloseEvent *event);
 
-    QJsonDocument doc;
-    QJsonDocument opDoc;
     QProcess *opProcess;
-    HttpApiClient *client;
 
     //系统托盘
     QSystemTrayIcon *systemTrayIcon;

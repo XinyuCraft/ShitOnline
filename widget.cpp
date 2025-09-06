@@ -1,7 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client, QWidget *parent)
+Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
@@ -9,10 +9,9 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client,
 
     setWindowTitle("ShitOnline");
 
-    doc = _doc;
-    opDoc = _opDoc;
     opProcess = new QProcess(this);
-    client = _client;
+    manager = ConfigManager::getInstance();
+    client = HttpApiClient::getInstance();
 
     //系统托盘
     systemTrayIcon = new QSystemTrayIcon(this);
@@ -31,7 +30,7 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client,
     systemTrayIcon->setContextMenu(menu);
     systemTrayIcon->show();
 
-    ui->label_myuuid->setText(doc.object().value("UUID").toString());
+    ui->label_myuuid->setText(manager->configObj.value("UUID").toString());
 
     //连接信号与槽
     connect(opProcess, &QProcess::readyReadStandardOutput, this, &Widget::readOpOutut);
@@ -41,6 +40,8 @@ Widget::Widget(QJsonDocument _doc, QJsonDocument _opDoc, HttpApiClient *_client,
     connect(opProcess, &QProcess::started, this, [=](){
         qDebug() <<"OpenP2P started";
     });
+
+    loadApp(); //加载隧道
 }
 
 Widget::~Widget()
@@ -48,40 +49,76 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::addNewApp(QString uuid, int dstPort, int srcport, QString protocol) //添加APP
+void Widget::addNewApp(const QString &appName, const QString &uuid, const int &dstport, const int &srcport, const QString &protocol)
 {
-    QJsonObject rootObj = opDoc.object();
-    QJsonArray appsArray; //因为现在只能使用一个隧道
-    QJsonObject newApp;
+    if(manager->isSrcPortTaken(srcport) == true){ //本地端口是否被占用
+        //在列表中添加隧道
+        QListWidgetItem *item = new QListWidgetItem();
+        AppItem *appItem = new AppItem(item, 1, appName, uuid, dstport, srcport, protocol, this);
 
-    newApp.insert("AppName", "ShitOnline");
-    newApp.insert("Protocol", protocol);
-    newApp.insert("Whitelist", "");
-    newApp.insert("SrcPort", srcport);
-    newApp.insert("PeerNode", uuid);
-    newApp.insert("DstPort", dstPort);
-    newApp.insert("DstHost", "localhost");
-    newApp.insert("PeerUser", "");
-    newApp.insert("RelayNode", "");
-    newApp.insert("Enabled", 1);
+        item->setSizeHint(QSize(350, 60));
+        ui->listWidget->addItem(item);
 
-    appsArray.append(newApp);
-    rootObj["apps"] = appsArray;
-    opDoc.setObject(rootObj);
+        ui->listWidget->setItemWidget(item, appItem);
+
+        //将隧道添加到配置文件里
+        manager->addNewApp(appName, uuid, dstport, srcport, protocol);
+        manager->saveOpConfig();
+    }
+    else{
+        QMessageBox::warning(this, "添加错误", "本地端口被占用, 请更换本地端口");
+    }
 }
 
-void Widget::saveOpConfig() //保存OpenP2P的配置
+void Widget::loadApp()
 {
-    QString path = QApplication::applicationDirPath();
-    QFile opConfig(path + "/.shitonline/bin/config.json");
+    //添加配置中的隧道
+    QJsonArray appsArray = manager->opConfigObj.value("apps").toArray();
+    for(int i = 0;i < appsArray.size();i++){
+        QJsonObject app = appsArray[i].toObject();
 
-    if(!opConfig.open(QIODevice::WriteOnly)){
-        qDebug() <<"Failed to open config file:" << opConfig.errorString();
+        //在列表中添加隧道
+        QListWidgetItem *item = new QListWidgetItem();
+        AppItem *appItem = new AppItem(item, app["Enabled"].toInt(), app["AppName"].toString(), app["PeerNode"].toString(), app["DstPort"].toInt(), app["SrcPort"].toInt(), app["Protocol"].toString(), this);
+
+        item->setSizeHint(QSize(350, 60));
+        ui->listWidget->addItem(item);
+
+        ui->listWidget->setItemWidget(item, appItem);
+
+        connect(appItem, &AppItem::enabledChanged, manager, &ConfigManager::changeEnabled);
+        connect(this, &Widget::connected, appItem, &AppItem::changeConnectionState);
+        connect(this, &Widget::disconnected, appItem, &AppItem::changeConnectionState);
     }
+}
 
-    //写入配置文件
-    opConfig.write(opDoc.toJson());
-    opConfig.close();
+void Widget::deleteApp(QListWidgetItem *item, const int &srcport) //删除隧道
+{
+    if (item)
+    {
+        delete item;
+    }
+    manager->deleteApp(srcport);
+    manager->saveOpConfig();
+}
+
+void Widget::editApp(const QString &appName, const QString &uuid, const int &dstport, const int &pastSrcPort, const QString &protocol, AppItem *item)
+{
+    AddNewAppDialog *addNewAppDialog = new AddNewAppDialog(appName, uuid, QString::number(dstport), QString::number(pastSrcPort), protocol);
+    addNewAppDialog->show();
+
+    connect(addNewAppDialog, &AddNewAppDialog::dataReturned, this, [this, item, pastSrcPort](const QString &appName, const QString &uuid, const int &dstport, const int &srcport, const QString &protocol){
+        if(manager->isSrcPortTaken(srcport) == true){
+            this->manager->changeAppConfig(pastSrcPort, appName, uuid, dstport, srcport, protocol);
+            this->manager->saveOpConfig();
+            item->changeApp(appName, uuid, dstport, srcport, protocol);
+        }
+        else{
+            QMessageBox::warning(this, "添加错误", "本地端口被占用, 请更换本地端口");
+        }
+    });
+
+    addNewAppDialog->exec();
 }
 
 void Widget::startOpenP2P() //启动OpenP2P
@@ -103,22 +140,9 @@ void Widget::startOpenP2P() //启动OpenP2P
     // }
 }
 
-void Widget::on_pushButton_copy_myuuid_clicked() //将UUID添加到剪贴板
-{
-    addToClipboard(ui->label_myuuid->text());
-}
-
-void Widget::addToClipboard(QString copyMessage) //添加到剪贴板
-{
-    QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(copyMessage);
-}
 
 void Widget::readOpOutut() //读取OpenP2P的输出
 {
-    QString protocol = ui->comboBox_protocol->currentText();
-    QString srcport = ui->lineEdit_srcport->text();
-
     QString outPut = opProcess->readAllStandardOutput(); //获取OpenP2P的输出
     qDebug() <<outPut;
 
@@ -128,10 +152,9 @@ void Widget::readOpOutut() //读取OpenP2P的输出
         ui->label_mystate->setText("本机状态: 在线");
     }
 
-    if(outPut.contains("LISTEN ON PORT " + protocol + ":" + srcport + " START")){ //隧道是否添加成功
+    if(outPut.contains("LISTEN ON PORT ")){ //隧道是否添加成功
+        emit connected(outPut);
         qDebug() <<"隧道添加成功";
-
-        ui->label_connect_state->setText("连接状态: 在线");
     }
 }
 
@@ -145,42 +168,52 @@ void Widget::closeEvent(QCloseEvent *event) //重写退出事件
 void Widget::on_pushButton_start_clicked()
 {
     if(ui->pushButton_start->text() == "启动"){
-        //获取输入信息
-        QString uuid = ui->lineEdit_uuid->text();
-        int dstPort = ui->lineEdit_dstport->text().toInt();
-        int srcport = ui->lineEdit_srcport->text().toInt();
-        QString protocol = ui->comboBox_protocol->currentText();
+        //发出启动信号
+        emit started();
 
-        //添加新的隧道
-        addNewApp(uuid, dstPort, srcport, protocol);
-
-        //保存OpenP2P的配置
-        saveOpConfig();
+        //保存配置
+        manager->saveConfig();
+        manager->saveOpConfig();
 
         //启动OpenP2P
         startOpenP2P();
 
         ui->pushButton_start->setText("关闭");
+
+        //禁用添加隧道按钮
+        ui->pushButton_add_new_app->setEnabled(false);
     }
     else if(ui->pushButton_start->text() == "关闭"){
-        opProcess->kill(); //关闭OpenP2P
+        //发出关闭信号
+        emit stopped();
 
+        opProcess->kill(); //关闭OpenP2P
+        emit disconnected("");
         ui->pushButton_start->setText("启动");
-        ui->label_connect_state->setText("连接状态: 离线");
         ui->label_mystate->setText("本机状态: 离线");
+
+        //启用添加隧道功能
+        ui->pushButton_add_new_app->setEnabled(true);
     }
 }
 
 
-void Widget::on_pushButton_copy_addr_clicked()
-{
-    addToClipboard("localhost:" + ui->lineEdit_srcport->text());
-}
-
-void Widget::onSystemTrayClicked(QSystemTrayIcon::ActivationReason reason) //处理
+void Widget::onSystemTrayClicked(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::DoubleClick){
         this->show();
     }
+}
+
+
+void Widget::on_pushButton_add_new_app_clicked() //添加新的隧道
+{
+    AddNewAppDialog *addNewAppDialog = new AddNewAppDialog(this);
+    addNewAppDialog->show();
+
+    connect(addNewAppDialog, &AddNewAppDialog::dataReturned, this, &Widget::addNewApp);
+    manager->saveOpConfig();
+
+    addNewAppDialog->exec();
 }
 
