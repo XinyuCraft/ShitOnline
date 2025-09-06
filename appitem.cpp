@@ -1,6 +1,7 @@
 #include "appitem.h"
 #include "ui_appitem.h"
 #include "widget.h"
+#include "configmanager.h"
 
 AppItem::AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_appName, const QString &_uuid, const int &_dstport, const int &_srcport, const QString &_protocol, Widget *parent)
     : QWidget(parent)
@@ -26,6 +27,9 @@ AppItem::AppItem(QListWidgetItem *_item, const int &_enabled, const QString &_ap
 
     connect(this, &AppItem::appDeleted, parent, &Widget::deleteApp);
     connect(this, &AppItem::appEdited, parent, &Widget::editApp);
+    connect(parent, &Widget::connected, this, &AppItem::changeConnectionState);
+    connect(parent, &Widget::disconnected, this, &AppItem::changeConnectionState);
+    connect(this, &AppItem::enabledChanged, ConfigManager::getInstance(), &ConfigManager::changeEnabled);
     connect(parent, &Widget::started, this, [this](){
         ui->pushButton_del->setEnabled(false);
         ui->pushButton_edit->setEnabled(false);

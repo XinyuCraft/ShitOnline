@@ -1,7 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-Widget::Widget(ConfigManager *_manager, HttpApiClient *_client, QWidget *parent)
+Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
@@ -10,8 +10,8 @@ Widget::Widget(ConfigManager *_manager, HttpApiClient *_client, QWidget *parent)
     setWindowTitle("ShitOnline");
 
     opProcess = new QProcess(this);
-    manager = _manager;
-    client = _client;
+    manager = ConfigManager::getInstance();
+    client = HttpApiClient::getInstance();
 
     //系统托盘
     systemTrayIcon = new QSystemTrayIcon(this);
@@ -60,10 +60,6 @@ void Widget::addNewApp(const QString &appName, const QString &uuid, const int &d
         ui->listWidget->addItem(item);
 
         ui->listWidget->setItemWidget(item, appItem);
-
-        connect(appItem, &AppItem::enabledChanged, manager, &ConfigManager::changeEnabled);
-        connect(this, &Widget::connected, appItem, &AppItem::changeConnectionState);
-        connect(this, &Widget::disconnected, appItem, &AppItem::changeConnectionState);
 
         //将隧道添加到配置文件里
         manager->addNewApp(appName, uuid, dstport, srcport, protocol);

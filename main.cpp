@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setWindowIcon(QIcon(":/image/icon.png"));
 
-    client = new HttpApiClient();
-    manager = new ConfigManager();
+    client = HttpApiClient::getInstance();
+    manager = ConfigManager::getInstance();
 
     path = QApplication::applicationDirPath();
     // DownloadFrame d;
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     //检查文件完整性
     verifyFileIntegrity();
 
-    Widget w(manager, client);
+    Widget w;
     w.show();
     return a.exec();
 }

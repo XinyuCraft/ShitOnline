@@ -15,11 +15,13 @@ class HttpApiClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit HttpApiClient(QObject *parent = nullptr);
+    static HttpApiClient* getInstance();
 
     void getOpLatestVersion();
 
 private:
+    explicit HttpApiClient(QObject *parent = nullptr);
+
     QNetworkAccessManager *manager = new QNetworkAccessManager;
 
 signals:

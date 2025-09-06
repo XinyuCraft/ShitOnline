@@ -35,7 +35,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(ConfigManager *_manager, HttpApiClient *_client, QWidget *parent = nullptr);
+    Widget(QWidget *parent = nullptr);
     ~Widget();
 
     void startOpenP2P();

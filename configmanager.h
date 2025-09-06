@@ -19,7 +19,8 @@ class ConfigManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConfigManager(QString _configPath = QApplication::applicationDirPath() + "/.shitonline/config.json", QString _opConfigPath = QApplication::applicationDirPath() + "/.shitonline/bin/config.json", QObject *parent = nullptr);
+    //获取单例
+    static ConfigManager* getInstance();
 
     void initializeConfig();
     void loadConfig();
@@ -38,6 +39,12 @@ public:
 signals:
 
 private:
+    explicit ConfigManager(QString _configPath = QApplication::applicationDirPath() + "/.shitonline/config.json", QString _opConfigPath = QApplication::applicationDirPath() + "/.shitonline/bin/config.json", QObject *parent = nullptr);
+
+    //删除拷贝构造和赋值操作符，防止拷贝
+    ConfigManager(const ConfigManager&) = delete;
+    ConfigManager& operator=(const ConfigManager&) = delete;
+
     QJsonDocument configDoc; //程序配置文档
     QJsonDocument opConfigDoc; //OpenP2P配置文档
     QString configPath; //配置文件路径

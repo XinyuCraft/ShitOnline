@@ -7,6 +7,12 @@ ConfigManager::ConfigManager(QString _configPath, QString _opConfigPath, QObject
     opConfigPath = _opConfigPath;
 }
 
+ConfigManager *ConfigManager::getInstance() //获取单例
+{
+    static ConfigManager *instance = new ConfigManager();
+    return instance;
+}
+
 void ConfigManager::initializeConfig() //初始化配置文件
 {
     QFile *configFile = new QFile(configPath);
