@@ -50,12 +50,12 @@ AppItem::~AppItem()
 void AppItem::changeConnectionState(QString connectionInfo)
 {
     if(connectionInfo.contains("LISTEN ON PORT " + protocol + ":" + QString::number(srcport) + " START")){
-        qDebug() << appName << "隧道连接成功";
+        qInfo() << appName << "隧道连接成功";
 
         ui->label_app_name->setText(QString("<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">%1(在线)</span></p></body></html>").arg(appName));
     }
     else if(connectionInfo == ""){
-        qDebug() << appName << "隧道断开";
+        qInfo() << appName << "隧道断开";
 
         ui->label_app_name->setText(QString("<html><head/><body><p><span style=\" font-size:12pt; font-weight:700;\">%1(离线)</span></p></body></html>").arg(appName));
     }

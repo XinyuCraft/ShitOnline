@@ -22,7 +22,7 @@ void DownloadFrame::downloadFile(QUrl downloadedUrl, QString filePath) //下载�
 {
     QFile *file = new QFile(filePath);
     if(!file->open(QIODevice::WriteOnly)){
-        qDebug() <<"打开文件失败: " << file->errorString();
+        qWarning() <<"打开文件失败: " << file->errorString();
         emit downloadFinished(false); //发送失败信号
         return;
     }
@@ -51,7 +51,7 @@ void DownloadFrame::downloadFile(QUrl downloadedUrl, QString filePath) //下载�
             emit downloadFinished(true); //成功
         }
         else{
-            qDebug() <<"下载失败: "<<reply->errorString();
+            qWarning() <<"下载失败: "<<reply->errorString();
             QMessageBox::warning(this, "下载信息", QString("下载失败: %1").arg(reply->errorString()));
             emit downloadFinished(false); //失败
         }

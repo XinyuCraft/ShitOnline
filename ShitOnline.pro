@@ -18,6 +18,7 @@ SOURCES += \
     configmanager.cpp \
     downloadframe.cpp \
     httpapiclient.cpp \
+    logger.cpp \
     main.cpp \
     widget.cpp
 
@@ -27,6 +28,7 @@ HEADERS += \
     configmanager.h \
     downloadframe.h \
     httpapiclient.h \
+    logger.h \
     widget.h
 
 FORMS += \

@@ -17,9 +17,9 @@ void ConfigManager::initializeConfig() //初始化配置文件
 {
     QFile *configFile = new QFile(configPath);
     QFile *opConfigFile = new QFile(opConfigPath);
-    QDir().mkpath(QApplication::applicationDirPath() + "/.shitonline/bin");  //创建目录
+    QDir().mkpath(QApplication::applicationDirPath() + "/.shitonline/bin"); //创建目录
     if(!configFile->exists()){
-        qDebug() << "配置文件未存在, 正在创建默认配置...";
+        qInfo() << "配置文件未存在, 正在创建默认配置...";
 
         //生成UUID
         QUuid uuid = QUuid::createUuid();
@@ -30,7 +30,7 @@ void ConfigManager::initializeConfig() //初始化配置文件
 
         //创建并打开配置文件
         if (!configFile->open(QIODevice::WriteOnly)) {
-            qDebug() << "打开文件报错: " << configFile->errorString();
+            qWarning() << "打开文件报错: " << configFile->errorString();
         }
 
         //写入JSON文件
@@ -40,7 +40,7 @@ void ConfigManager::initializeConfig() //初始化配置文件
     if(!opConfigFile->exists()){
         //创建文件
         if(!opConfigFile->open(QIODevice::WriteOnly)){
-            qDebug() << "打开文件报错: " << opConfigFile->errorString();
+            qWarning() << "打开文件报错: " << opConfigFile->errorString();
         }
 
         QJsonObject networkConfig;
@@ -70,7 +70,7 @@ void ConfigManager::loadConfig()
 {
     QFile *file = new QFile(configPath);
     if(!file->open(QIODevice::ReadOnly)){
-        qDebug() << "打开文件报错: " << file->errorString();
+        qWarning() << "打开文件报错: " << file->errorString();
     }
 
     configDoc = QJsonDocument::fromJson(file->readAll());
@@ -82,7 +82,7 @@ void ConfigManager::loadOpConfig()
 {
     QFile *file = new QFile(opConfigPath);
     if(!file->open(QIODevice::ReadOnly)){
-        qDebug() << "打开文件报错: " << file->errorString();
+        qWarning() << "打开文件报错: " << file->errorString();
     }
 
     opConfigDoc = QJsonDocument::fromJson(file->readAll());
@@ -94,7 +94,7 @@ void ConfigManager::saveConfig()
 {
     QFile *file = new QFile(configPath);
     if (!file->open(QIODevice::WriteOnly)) {
-        qDebug() << "打开文件报错: " << file->errorString();
+        qWarning() << "打开文件报错: " << file->errorString();
     }
 
     //写入配置文件
@@ -106,7 +106,7 @@ void ConfigManager::saveOpConfig()
 {
     QFile *file = new QFile(opConfigPath);
     if(!file->open(QIODevice::WriteOnly)){
-        qDebug() << "打开文件报错: " << file->errorString();
+        qWarning() << "打开文件报错: " << file->errorString();
     }
 
     //写入配置文件

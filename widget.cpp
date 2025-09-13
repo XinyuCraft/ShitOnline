@@ -35,10 +35,10 @@ Widget::Widget(QWidget *parent)
     //连接信号与槽
     connect(opProcess, &QProcess::readyReadStandardOutput, this, &Widget::readOpOutut);
     connect(opProcess, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error){
-        qDebug() <<"Process error:"<<error;
+        qWarning() <<"线程错误: "<<error;
     });
     connect(opProcess, &QProcess::started, this, [=](){
-        qDebug() <<"OpenP2P started";
+        qInfo() <<"OpenP2P已启动!";
     });
 
     loadApp(); //加载隧道
@@ -126,11 +126,12 @@ void Widget::startOpenP2P() //启动OpenP2P
     QString workingDir = QCoreApplication::applicationDirPath() + "/.shitonline/bin";
     QString exePath = workingDir + "/openp2p.exe";
     if(!QFile::exists(exePath)) { //检查是否存在
-        qDebug() <<"openp2p.exe not found at "<<exePath;
+        qWarning() <<"openp2p.exe 没有找到!"<<exePath;
         return;
     }
 
     //启动OpenP2P
+    qInfo() << "启动OpenP2P中...";
     opProcess->setWorkingDirectory(workingDir);
     opProcess->start(exePath);
     // 检查是否启动成功
@@ -147,14 +148,13 @@ void Widget::readOpOutut() //读取OpenP2P的输出
     qDebug() <<outPut;
 
     if(outPut.contains("P2PNetwork init start")){ //OpenP2P是否启动成功
-        qDebug() <<"OpenP2P启动成功";
+        qInfo() <<"OpenP2P启动成功";
 
         ui->label_mystate->setText("本机状态: 在线");
     }
 
     if(outPut.contains("LISTEN ON PORT ")){ //隧道是否添加成功
         emit connected(outPut);
-        qDebug() <<"隧道添加成功";
     }
 }
 
