@@ -2,6 +2,7 @@
 #include "downloadframe.h"
 #include "httpapiclient.h"
 #include "configmanager.h"
+#include "logger.h"
 
 #include <QApplication>
 #include <QUuid>
@@ -52,8 +53,12 @@ void verifyFileIntegrity(){ //检查文件完整性
         loop.exec();
         d.close();
 
+        qInfo() << "下载成功, 正在解压中...";
+
         //解压压缩包
         zipReader(path + "/.shitonline/openp2p.zip", path + "/.shitonline/bin");
+
+        qInfo() << "解压成功!";
     }
 }
 
@@ -66,13 +71,21 @@ int main(int argc, char *argv[])
     manager = ConfigManager::getInstance();
 
     path = QApplication::applicationDirPath();
-    // DownloadFrame d;
-    // d.show();
-    // d.downloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
     opPath = path + "/.shitonline/bin/openp2p.exe";
+
+    //启动日志功能
+    Logger::getInstance()->start();
 
     //检查文件完整性
     verifyFileIntegrity();
+
+    qInfo() << "ShitOnline已启动!";
+
+
+    // DownloadFrame d;
+    // d.show();
+    // d.downloadFile(QUrl("https://raw.githubusercontent.com/XinyuCraft/ShitOnline/refs/heads/master/main.cpp"), path + "/.shitonline/main.cpp");
+
 
     Widget w;
     w.show();

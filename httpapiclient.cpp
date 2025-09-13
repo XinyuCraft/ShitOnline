@@ -12,6 +12,8 @@ HttpApiClient *HttpApiClient::getInstance()
 
 void HttpApiClient::getOpLatestVersion() //获取OpenP2P最新版本
 {
+    qInfo() << "正在获取OpenP2P最新版本";
+
     QNetworkRequest request(QUrl("https://api.github.com/repos/openp2p-cn/openp2p/releases/latest"));
 
     QNetworkReply *reply = manager->get(request);
@@ -33,7 +35,7 @@ void HttpApiClient::getOpLatestVersion() //获取OpenP2P最新版本
             emit getOpLatestVersionFinished(obj.value("name").toString(), url);
         }
         else{
-            qDebug() <<"Error: "<<reply->errorString();
+            qWarning() <<"获取错误: "<<reply->errorString();
         }
         reply->deleteLater();
     });
