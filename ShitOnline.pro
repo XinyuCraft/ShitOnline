@@ -50,3 +50,5 @@ RC_ICONS = icon.ico
 
 RESOURCES += \
     res.qrc
+
+VERSION = 1.0.0
