@@ -54,6 +54,8 @@ private slots:
 
     void loadApp();
 
+    void on_pushButton_copy_myuuid_clicked();
+
 public slots:
     void deleteApp(QListWidgetItem *item, const int &srcport);
 

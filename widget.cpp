@@ -217,3 +217,10 @@ void Widget::on_pushButton_add_new_app_clicked() //添加新的隧道
     addNewAppDialog->exec();
 }
 
+
+void Widget::on_pushButton_copy_myuuid_clicked() //复制UUID
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(ui->label_myuuid->text());
+}
+
