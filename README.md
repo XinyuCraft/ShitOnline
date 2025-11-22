@@ -1,6 +1,9 @@
 ![logo](./icon.png)
-# ShitOnline
-(目前还在开发中...)
+# ShitOnline V1版本
+
+> [!WARNING]
+> 这个分支是 **V1** 版本的分支，这是为了纪念，其功能已经被全部抛弃。
+> 最新的 **V2** 版本正在开发中。
 
 本软件是基于 [OpenP2P](https://github.com/openp2p-cn/openp2p) 的一个简洁快速的联机工具
 
